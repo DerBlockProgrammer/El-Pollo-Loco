@@ -10,7 +10,7 @@ class Character extends MovableObject {
         'img/img/2_character_pepe/2_walk/W-26.png'
 
     ];
-    currentImage = 0;
+   
 
     constructor() {
         super().loadImage('img/img/2_character_pepe/2_walk/W-21.png');
