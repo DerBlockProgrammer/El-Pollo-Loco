@@ -3,13 +3,13 @@ class Chicken extends MovableObject{
     height = 70;
     width = 80;
     IMAGES_WALKING = [
-        'img/img/3_enemies_chicken/chicken_normal/1_walk/1_w.png',
-        'img/img/3_enemies_chicken/chicken_normal/1_walk/2_w.png',
-        'img/img/3_enemies_chicken/chicken_normal/1_walk/3_w.png'
+        'img/3_enemies_chicken/chicken_normal/1_walk/1_w.png',
+        'img/3_enemies_chicken/chicken_normal/1_walk/2_w.png',
+        'img/3_enemies_chicken/chicken_normal/1_walk/3_w.png'
     ];
   
     constructor(){
-        super().loadImage('img/img/3_enemies_chicken/chicken_normal/1_walk/1_w.png');
+        super().loadImage('img/3_enemies_chicken/chicken_normal/1_walk/1_w.png');
         this.loadImages(this.IMAGES_WALKING);
 
         this.x = 200 + Math.random() * 500;
