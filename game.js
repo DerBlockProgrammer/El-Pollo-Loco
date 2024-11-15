@@ -9,44 +9,44 @@ function init() {
     ctx = canvas.getContext('2d');
 
 
-    character.src = '../img/img/2_character_pepe/2_walk/W-21.png';
-    ctx.drawImage(character.src, 20, 20, 50, 100);
+    // character.src = '../img/img/2_character_pepe/2_walk/W-21.png';
+    // ctx.drawImage(character.src, 20, 20, 50, 100);
 
     console.log('My Character is', world.Character);
 }
 
 window.addEventListener("keydown", (e) => {
     if (e.keyCode == 39) {
-        Keyboard.RIGHT = true;
+        keyboard.RIGHT = true;
     }
     if (e.keyCode == 37) {
-        Keyboard.LEFT = true;
+        keyboard.LEFT = true;
     }
     if (e.keyCode == 38) {
-        Keyboard.UP = true;
+        keyboard.UP = true;
     }
     if (e.KeyCode == 40) {
-        Keyboard.DOWN = true;
+        keyboard.DOWN = true;
     }
     if (e.KeyCode == 32) {
-        Keyboard.SPACE = true;
+        keyboard.SPACE = true;
     }
     console.log(e);
 });
 window.addEventListener("keyup", (e) => {
     if (e.keyCode == 39) {
-        Keyboard.RIGHT = false;
+        keyboard.RIGHT = false;
     }
     if (e.keyCode == 37) {
-        Keyboard.LEFT = false;
+        keyboard.LEFT = false;
     }
     if (e.keyCode == 38) {
-        Keyboard.UP = false;
+        keyboard.UP = false;
     }
     if (e.KeyCode == 40) {
-        Keyboard.DOWN = false;
+        keyboard.DOWN = false;
     }
     if (e.KeyCode == 32) {
-        Keyboard.SPACE = false;
+        keyboard.SPACE = false;
     }
 });
