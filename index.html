@@ -4,9 +4,21 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link
+        href="https://fonts.googleapis.com/css2?family=Edu+AU+VIC+WA+NT+Guides:wght@400..700&family=Ga+Maamli&display=swap"
+        rel="stylesheet">
     <link rel="stylesheet" href="./style.css">
-     <title>El PollomLoco</title>
-     <script src="./models/drawable-object.class.js"></script>
+    <title>El PollomLoco</title>
+    <style>
+        @font-face {
+            font-family: 'retro';
+            src: url('./fonts/retroGaming.ttf') format('truetype');
+            /* Chrome 4+, Firefox 3.5, Opera 10+, Safari 3—5 */
+        }
+    </style>
+    <script src="./models/drawable-object.class.js"></script>
     <script src="./models/movable-object.class.js"></script>
     <script src="./models/character.class.js"></script>
     <script src="./models/chicken.class.js"></script>
@@ -17,20 +29,28 @@
     <script src="./models/keyboard.class.js"></script>
     <script src="./models/level.class.js"></script>
     <script src="./models/throwable-objects.class.js"></script>
-    
-   
-  
+
+
+
     <script src="./models/endboss.class.js"></script>
-   
-   
+
+
     <script src="./models/levels/level1.js"></script>
     <script src="./game.js"></script>
 
-   
+
 </head>
 
 <body onload="init()">
-   <h1>El Pollo Loco</h1>
+
+    <div id="menu">
+        <h1>El Pollo Loco</h1>
+        <button id="playButton">Play</button>
+        <button id="optionsButton">Options</button>
+        <button id="exitButton">Exit</button>
+    </div>
+   
+   
     <canvas id="canvas" width="720px" height="480px">
 
     </canvas>
