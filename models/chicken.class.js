@@ -10,6 +10,7 @@ class Chicken extends MovableObject {
         'img/3_enemies_chicken/chicken_normal/1_walk/2_w.png',
         'img/3_enemies_chicken/chicken_normal/1_walk/3_w.png'
     ];
+    
     walking_chicken = new Audio('audio/chicken.mp3')
 
     constructor() {
@@ -37,14 +38,14 @@ class Chicken extends MovableObject {
         }, 1000);
     }
     die() {
-        if (this.isDead) return; // Verhindert mehrfaches Ausführen
+        if (this.isDead) return; 
         this.isDead = true;
 
         // Animation: Das Huhn fliegt nach oben
         let flyUpInterval = setInterval(() => {
-            this.y -= 5; // Nach oben bewegen
+            this.y -= 5; 
             if (this.y < -this.height) {
-                clearInterval(flyUpInterval); // Beendet die Animation, wenn das Huhn aus dem Bildschirm verschwindet
+                clearInterval(flyUpInterval); 
             }
         }, 1000 / 60);
     }

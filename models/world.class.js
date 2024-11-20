@@ -69,8 +69,8 @@ class World {
         this.throwableObjects.forEach((bottle) => {
             this.level.enemies.forEach((enemy) => {
                 if (bottle.isColling(enemy) && !enemy.isDead) {
-                    enemy.die(); // Gegner stirbt
-                    this.removeThrowableObject(bottle); // Flasche entfernen
+                    enemy.die(); 
+                    
                 }
             });
         });
