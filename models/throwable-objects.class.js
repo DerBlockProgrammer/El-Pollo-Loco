@@ -8,6 +8,7 @@ class ThrowableObjects extends MovableObject{
         this.trow(100,150);
       
     }
+    
 
   trow(){
     this.speedY = 20;

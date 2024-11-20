@@ -60,14 +60,26 @@ class World {
 
     checkCollisions(){
         this.level.enemies.forEach((enemy) => {
-            if (this.character.isColling(enemy)) {
-
+            if (this.character.isColling(enemy) && !enemy.isDead) {
                 this.character.hit();
                 this.statusBar.setPercentage(this.character.energy);
-
             }
-
         });
+
+        this.throwableObjects.forEach((bottle) => {
+            this.level.enemies.forEach((enemy) => {
+                if (bottle.isColling(enemy) && !enemy.isDead) {
+                    enemy.die(); // Gegner stirbt
+                    this.removeThrowableObject(bottle); // Flasche entfernen
+                }
+            });
+        });
+
+
+
+
+
+
     }
     draw() {
 
