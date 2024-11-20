@@ -7,11 +7,18 @@ class World {
     camera_x = 0;
     statusBar = new StatusBar();
     throwableObjects = [];
+    backgroundMusic;
+    musicInterval;
 
     constructor(canvas, keyboard) {
         this.ctx = canvas.getContext('2d');
         this.canvas = canvas;
         this.keyboard = keyboard;
+        this.backgroundMusic = new Audio('./audio/mexikan.mp3'); // Pfad zur Musikdatei
+        this.backgroundMusic.loop = true; 
+        this.backgroundMusic.volume = 0.1; 
+        this.backgroundMusic.play(); 
+        this.setupMusic();
         this.draw();
         this.setWorld();
         this.run();
@@ -26,6 +33,22 @@ class World {
            this.checkThrowObjects();
 
         }, 200);
+    }
+
+    //Musik Intervall
+    setupMusic() {
+        const playDuration = 5000; 
+        const pauseDuration = 3000; 
+
+        this.musicInterval = setInterval(() => {
+            this.backgroundMusic.play(); 
+
+           
+            setTimeout(() => {
+                this.backgroundMusic.pause();
+                this.backgroundMusic.currentTime = 0; 
+            }, playDuration);
+        }, playDuration + pauseDuration);
     }
 
     checkThrowObjects(){
@@ -79,6 +102,7 @@ class World {
         });
 
     }
+    
 
     addToMap(mo) {
         if (mo.otherDirection) {
@@ -98,4 +122,7 @@ class World {
 
         }
     }
+    
+    
+
 }
