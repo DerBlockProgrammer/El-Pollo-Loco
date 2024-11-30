@@ -78,21 +78,28 @@ class World {
                 this.character.hit();
                 this.statusBar.setPercentage(this.character.energy);
             }
+            
 
         });
+        
 
 
-        this.level.coins.forEach((coin, index) => {
-            if (this.character.isColliding(coin)) {
-                this.level.coins.splice(index, 1); // Coin aus der Liste entfernen
-                this.character.collectCoin(); // Coin sammeln
-            }
-        });
+        // this.level.coins.forEach((coin, index) => {
+        //     if (this.character.isColliding(coin)) {
+        //         this.level.coins.splice(index, 1); // Coin aus der Liste entfernen
+        //         this.character.collectCoin(); // Coin sammeln
+        //     }
+        // });
 
         this.throwableObjects.forEach((bottle) => {
             this.level.enemies.forEach((enemy) => {
                 if (bottle.isColling(enemy) && !enemy.isDead) {
-                    enemy.die();
+                    if (enemy instanceof Endboss) {
+                        enemy.takeDamage(5);
+                    }else {
+                        enemy.die();
+                    }
+                    this.throwableObjects.splice(bottleIndex, 1);
 
                 }
             });

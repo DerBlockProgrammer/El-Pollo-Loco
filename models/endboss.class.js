@@ -3,6 +3,7 @@ class Endboss extends MovableObject {
     width = 300;
     y = 190;
     health = 100;
+    x = 2500;
    
 
 
@@ -28,14 +29,13 @@ class Endboss extends MovableObject {
         'img/7_statusbars/2_statusbar_endboss/blue/blue100.png'
     ];
 
-    statusBarIndex = 0;
+    statusBarIndex = 5;
 
 
 
     constructor() {
         super().loadImage(this.IMAGES_WALKING[0]);
         this.loadImages(this.IMAGES_WALKING);
-        this.x = 2500;
         this.animate();
     }
 
@@ -54,37 +54,46 @@ class Endboss extends MovableObject {
 
 
     takeDamage(amount) {
-        this.life -= amount;  // Lebenspunkte reduzieren
-        this.updateStatusBar();
-
-        if (this.life <= 0) {
-            this.life = 0;
+        this.health -= amount; // Reduziere Lebenspunkte
+        if (this.health < 0) {
+            this.health = 0; // Verhindere negative Lebenspunkte
+        }
+        this.updateStatusBar(); // Aktualisiere die StatusBar
+    
+        if (this.health === 0) {
+            this.die(); // Endboss stirbt, wenn die Lebenspunkte auf 0 fallen
         }
     }
+    
 
 
 
     updateStatusBar() {
-        if (this.life > 75) {
-            this.statusBarIndex = 0;  // Volle Leiste
-        } else if (this.life > 50) {
-            this.statusBarIndex = 1;
-        } else if (this.life > 25) {
-            this.statusBarIndex = 2;
-        } else {
-            this.statusBarIndex = 3;  // Fast tot
-        }
+        const healthPercentage = Math.ceil((this.health / 100) * 5); // Berechnung in 20%-Schritten
+        this.statusBarIndex = 5 - healthPercentage; // Passe die StatusBar an
     }
+    
+    
     drawStatusBar(ctx) {
-
-        const offsetY = 40;
-
-        const statusImage = new Image();
+       
+    
+        const statusImage = new Image( );
         statusImage.src = this.IMAGES_STATUS[this.statusBarIndex];
         ctx.drawImage(statusImage, this.x, this.y - 170, 200, 60);
     }
     
-
+    die() {
+        this.isDead = true;
+      
+    }
+    draw(ctx) {
+        super.draw(ctx);
+        ctx.beginPath();
+        ctx.rect(this.x, this.y, this.width, this.height); // Hitbox anzeigen
+        ctx.lineWidth = 2;
+        ctx.strokeStyle = 'red';
+        ctx.stroke();
+    }
 
 
 
