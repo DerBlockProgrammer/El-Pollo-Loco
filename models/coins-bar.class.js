@@ -13,15 +13,15 @@ class CoinStatusBar extends DrawableObject{
         super();
         this.loadImages(this.IMAGES);
         this.x = 40; 
-        this.y = 80; 
+        this.y = 60; 
         this.width = 200;
-        this.height = 70;
-        this.setPercentage(this.percentage);
+        this.height = 50;
+        this.setPercentage(0);
     }
     setPercentage(percentage) {
         this.percentage = percentage; 
-        let path = this.IMAGES[this.resolveImageIndex()];
-        this.img = this.imageCache[path];
+        let imageIndex = Math.floor(this.percentage / 20); // Ermittelt das passende Bild
+        this.img = this.imageCache[this.IMAGES[imageIndex]];
 
 }
 resolveImageIndex() {

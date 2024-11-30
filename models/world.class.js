@@ -23,7 +23,7 @@ class World {
         this.backgroundMusic.volume = 0.1; 
         this.backgroundMusic.play(); 
         this.setupMusic();
-        // this.addCoinsToWorld();
+        this.coinStatusBar = new CoinStatusBar(); // Hinzufügen der Coin-Bar
         this.draw();
         this.setWorld();
         this.run();
@@ -102,6 +102,8 @@ class World {
         this.ctx.translate(-this.camera_x, 0); // zurück kamera, Objekte fixieren
 
         this.addToMap(this.statusBar);
+        this.addToMap(this.coinStatusBar);
+       
         this.ctx.translate(this.camera_x, 0); //vorwärts kamera
 
         this.addToMap(this.character);
@@ -110,6 +112,7 @@ class World {
 
         this.addObjectsToMap(this.throwableObjects);
         this.ctx.translate(-this.camera_x, 0);
+        
 
         //Draw() wird immer wieder aufgerufen
         let self = this;
