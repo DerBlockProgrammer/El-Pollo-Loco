@@ -9,6 +9,10 @@ class World {
     throwableObjects = [];
     backgroundMusic;
     musicInterval;
+    coinStatusBar = new CoinStatusBar();
+    coins = [];
+
+    
 
     constructor(canvas, keyboard) {
         this.ctx = canvas.getContext('2d');
@@ -19,12 +23,16 @@ class World {
         this.backgroundMusic.volume = 0.1; 
         this.backgroundMusic.play(); 
         this.setupMusic();
+        // this.addCoinsToWorld();
         this.draw();
         this.setWorld();
         this.run();
+        
     }
+    
     setWorld() {
         this.character.world = this;
+        
     }
 
     run() {
@@ -54,7 +62,8 @@ class World {
     checkThrowObjects(){
         if (this.keyboard.D) {
             let bottle = new ThrowableObjects(this.character.x +100, this.character.y +100) ;
-            this.throwableObjects.push(bottle);            
+            this.throwableObjects.push(bottle);   
+                     
         }
     }
 
@@ -87,6 +96,7 @@ class World {
         this.ctx.translate(this.camera_x, 0);
 
         this.addObjectsToMap(this.level.backgroundObjects);
+        
 
 
         this.ctx.translate(-this.camera_x, 0); // zurück kamera, Objekte fixieren
@@ -108,6 +118,7 @@ class World {
         });
     }
 
+
     addObjectsToMap(objects) {
         objects.forEach(o => {
             this.addToMap(o);
@@ -119,22 +130,18 @@ class World {
     addToMap(mo) {
         if (mo.otherDirection) {
             this.ctx.save();
-            this.ctx.translate(mo.width, 0);
+            this.ctx.translate(mo.x + mo.width, mo.y); // Richtige Position für Spiegelung
             this.ctx.scale(-1, 1);
-            mo.x = mo.x * -1;
-
-        }
-        mo.draw(this.ctx);
-        mo.drawFrame(this.ctx);
-
-
-        if (mo.otherDirection) {
-            mo.x = mo.x * -1;
+            mo.draw(this.ctx);
+            mo.drawFrame(this.ctx);
             this.ctx.restore();
-
+        } else {
+            mo.draw(this.ctx);
+            mo.drawFrame(this.ctx);
         }
     }
-    
-    
 
+    
 }
+
+

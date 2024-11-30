@@ -43,9 +43,9 @@ class Endboss extends MovableObject {
             this.playAnimation(this.IMAGES_WALKING);
         }, 100);
 
-        setInterval(() => {
-            this.drawHealthBar();
-        }, 100);
+        // setInterval(() => {
+        //     this.drawHealthBar();
+        // }, 100);
     }
 
 

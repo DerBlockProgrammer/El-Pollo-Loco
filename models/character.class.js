@@ -48,8 +48,8 @@ class Character extends MovableObject {
         'img/2_character_pepe/1_long_idle/I-8.png'
     ];
 
+    collectedCoins = 0;
     world;
-
     walking_sound = new Audio('audio/walking.mp3');
 
     constructor() {
@@ -62,9 +62,26 @@ class Character extends MovableObject {
         this.applyGravity();
         this.animate();
     }
+    checkCoinCollision() { // NEU
+        this.world.coins.forEach((coin, index) => {
+            if (this.isColliding(coin)) { // Prüft Kollision mit einem Coin
+                this.world.coins.splice(index, 1); // Coin entfernen
+                this.collectCoin(); // Coin sammeln
+            }
+        });
+    }
+
+    collectCoin() { // NEU
+        this.collectedCoins++;
+        let percentage = Math.min(this.collectedCoins * 20, 100); // Maximal 100%
+        this.world.coinStatusBar.setPercentage(percentage); // Coin-Anzeige aktualisieren
+    }
+    
 
     animate() {
         setInterval(() => {
+            this.checkCoinCollision();
+           
             this.walking_sound.pause();
 
            

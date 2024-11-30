@@ -23,8 +23,8 @@ class Chicken extends MovableObject {
 
 
         this.walking_chicken.volume = 0.10;
-        this.walking_chicken.play();
-        this.walking_chicken.pause();
+        // this.walking_chicken.play();
+        // this.walking_chicken.pause();
 
     }
 
