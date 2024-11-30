@@ -99,15 +99,11 @@ class World {
                     }else {
                         enemy.die();
                     }
-                    this.throwableObjects.splice(bottleIndex, 1);
+                  
 
                 }
             });
         });
-
-
-
-
 
 
     }
