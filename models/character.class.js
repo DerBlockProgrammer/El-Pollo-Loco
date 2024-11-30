@@ -81,7 +81,6 @@ class Character extends MovableObject {
     animate() {
         setInterval(() => {
             this.checkCoinCollision();
-           
             this.walking_sound.pause();
 
            

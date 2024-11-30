@@ -2,7 +2,8 @@ class Endboss extends MovableObject {
     height = 260;
     width = 300;
     y = 190;
-    health = 100; 
+    health = 100;
+   
 
 
     IMAGES_WALKING = [
@@ -18,16 +19,18 @@ class Endboss extends MovableObject {
 
     ];
 
-    IMAGES_STATUS =[
-        'img/7_statusbars/example_1.png',
-        'img/7_statusbars/example_2.png',
-        'img/7_statusbars/example_3.png',
-        'img/7_statusbars/example_4.png'
+    IMAGES_STATUS = [
+        'img/7_statusbars/2_statusbar_endboss/blue/blue0.png',
+        'img/7_statusbars/2_statusbar_endboss/blue/blue20.png',
+        'img/7_statusbars/2_statusbar_endboss/blue/blue40.png',
+        'img/7_statusbars/2_statusbar_endboss/blue/blue60.png',
+        'img/7_statusbars/2_statusbar_endboss/blue/blue80.png',
+        'img/7_statusbars/2_statusbar_endboss/blue/blue100.png'
     ];
 
-    statusBarIndex = 0; 
+    statusBarIndex = 0;
 
-  
+
 
     constructor() {
         super().loadImage(this.IMAGES_WALKING[0]);
@@ -52,10 +55,10 @@ class Endboss extends MovableObject {
 
     takeDamage(amount) {
         this.life -= amount;  // Lebenspunkte reduzieren
-        this.updateStatusBar();  
+        this.updateStatusBar();
 
         if (this.life <= 0) {
-            this.life = 0; 
+            this.life = 0;
         }
     }
 
@@ -65,22 +68,24 @@ class Endboss extends MovableObject {
         if (this.life > 75) {
             this.statusBarIndex = 0;  // Volle Leiste
         } else if (this.life > 50) {
-            this.statusBarIndex = 1;  
+            this.statusBarIndex = 1;
         } else if (this.life > 25) {
-            this.statusBarIndex = 2;  
+            this.statusBarIndex = 2;
         } else {
             this.statusBarIndex = 3;  // Fast tot
         }
     }
     drawStatusBar(ctx) {
-        if (this.life > 0) {
-            const statusImage = new Image();
-            statusImage.src = this.IMAGES_STATUS[this.statusBarIndex];
-            ctx.drawImage(statusImage, this.x, this.y - 40, 200, 30);  
-        }
+
+        const offsetY = 40;
+
+        const statusImage = new Image();
+        statusImage.src = this.IMAGES_STATUS[this.statusBarIndex];
+        ctx.drawImage(statusImage, this.x, this.y - 170, 200, 60);
     }
     
 
-    
+
+
 
 }
