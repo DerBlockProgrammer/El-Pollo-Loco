@@ -63,6 +63,9 @@ class Character extends MovableObject {
 
     // Проверяет столкновение с монетами и собирает их
     checkCoinCollision() {
+        if (!this.world || !this.world.coins) {
+            return; // Если world или массив coins не определены, выходим из метода
+        }
         this.world.coins.forEach((coin, index) => {
             if (this.isColliding(coin)) { // Проверка столкновения с монетой
                 this.world.coins.splice(index, 1); // Удаляем монету из массива
@@ -70,6 +73,7 @@ class Character extends MovableObject {
             }
         });
     }
+    
 
     collectCoin() {
         this.collectedCoins++;
@@ -103,10 +107,13 @@ class Character extends MovableObject {
 
     animate() {
         setInterval(() => {
+            // Если this.world или this.world.keyboard ещё не установлены, пропускаем этот кадр
+            if (!this.world || !this.world.keyboard) return;
+    
             this.checkCoinCollision();
             // Приостанавливаем звук ходьбы, чтобы избежать наложения
             this.walking_sound.pause();
-
+    
             // Движение вправо
             if (this.world.keyboard.RIGHT && this.x < this.world.level.level_end_x) {
                 this.moveRight();
@@ -134,7 +141,7 @@ class Character extends MovableObject {
             else if (!this.isAboveGround()) {
                 this.playAnimation(this.IMAGES_IDLE);
             }
-
+    
             if (this.isHurt()) {
                 this.playAnimation(this.IMAGES_HURT);
             }
@@ -144,9 +151,10 @@ class Character extends MovableObject {
             if (this.isAboveGround()) {
                 this.playAnimation(this.IMAGES_JUMPING);
             }
-
+    
             // Обновление позиции камеры
             this.world.camera_x = -this.x + 100;
         }, 1000 / 60); 
     }
+    
 }

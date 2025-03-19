@@ -123,4 +123,4 @@ class Endboss extends MovableObject {
         ctx.strokeStyle = 'red';
         ctx.stroke();
     }
-    
+}

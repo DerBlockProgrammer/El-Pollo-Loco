@@ -38,6 +38,7 @@
             cursor: pointer;
         }
     </style>
+    <!-- Начальные классы и зависимости -->
     <script src="./models/drawable-object.class.js"></script>
     <script src="./models/movable-object.class.js"></script>
     <script src="./models/coin.class.js"></script>
@@ -46,14 +47,23 @@
     <script src="./models/status-bar.class.js"></script>
     <script src="./models/coins-bar.class.js"></script>
     <script src="./models/clouds.class.js"></script>
-    <script src="./models/world.class.js"></script>
     <script src="./models/background-objects.class.js"></script>
     <script src="./models/keyboard.class.js"></script>
     <script src="./models/level.class.js"></script>
-    <script src="./models/throwable-objects.class.js"></script>
+
+<!-- Загружаем Endboss, так как он нужен level1.js -->
     <script src="./models/endboss.class.js"></script>
+    <script src="./models/throwable-objects.class.js"></script>
+
+<!-- Загружаем уровень, который использует Endboss -->
     <script src="./models/levels/level1.js"></script>
+
+<!-- Теперь загружаем World, который использует level1 -->
+    <script src="./models/world.class.js"></script>
+
+<!-- И, наконец, наш главный файл игры -->
     <script src="./game.js"></script>
+
     <script>
         // Функция рестарта игры – перезагружает страницу
         function restartGame() {
