@@ -14,46 +14,29 @@ class World {
     gameEnded = false; // Флаг, сигнализирующий о завершении игры
 
     constructor(canvas, keyboard) {
+        this.canThrow = true; // Флаг для управления частотой бросков
         this.ctx = canvas.getContext('2d');
         this.canvas = canvas;
         this.keyboard = keyboard;
 
-        // Инициализируем аудиофайл, но не запускаем его автоматически
+        // Настройка фоновой музыки (не запускаем автоматически)
         this.backgroundMusic = new Audio('./audio/mexikan.mp3');
-        this.backgroundMusic.loop = true;   // Может конфликтовать с периодическим play/pause в setupMusic()
+        this.backgroundMusic.loop = true;
         this.backgroundMusic.volume = 0.1;
-
-        // Убираем автозапуск:
-        // this.backgroundMusic.play();
-        // this.setupMusic();
 
         // Инициализируем панель для монет
         this.coinStatusBar = new CoinStatusBar();
 
-        // Запускаем основные процессы отрисовки и логики
         this.draw();
         this.setWorld();
         this.run();
-    }
-
-    /**
-     * Метод, который можно вызвать после клика пользователя,
-     * чтобы запустить музыку без ошибки "NotAllowedError".
-     */
-    startMusic() {
-        // Если хотите, чтобы музыка просто играла в бесконечном цикле, используйте:
-        // this.backgroundMusic.play();
-
-        // Если нужно чередование play/pause (по 5 секунд играть, 3 секунды пауза),
-        // раскомментируйте вызов setupMusic():
-        this.setupMusic();
     }
 
     setWorld() {
         this.character.world = this;
         this.level.enemies.forEach((enemy) => {
             if (enemy instanceof Endboss) {
-                enemy.world = this; // Передаём ссылку на World в Endboss
+                enemy.world = this;
             }
         });
     }
@@ -67,51 +50,27 @@ class World {
         }, 200);
     }
 
-    /**
-     * Чередование проигрывания музыки:
-     *  - 5 секунд играет,
-     *  - 3 секунды пауза,
-     *  - повторяется.
-     */
-    setupMusic() {
-        const playDuration = 5000;   // 5 секунд
-        const pauseDuration = 3000;  // 3 секунды
-
-        this.musicInterval = setInterval(() => {
-            this.backgroundMusic.play();
-
-            setTimeout(() => {
-                this.backgroundMusic.pause();
-                this.backgroundMusic.currentTime = 0;
-            }, playDuration);
-        }, playDuration + pauseDuration);
-    }
-
-    /**
-     * Проверяет, нажата ли клавиша для броска бутылок, и создает новый объект бутылки.
-     */
     checkThrowObjects() {
-        if (this.keyboard.D) {
-            let bottle = new ThrowableObjects(this.character.x + 100, this.character.y + 100);
+        // При нажатии D и флаге canThrow создаём бутылку
+        if (this.keyboard.D && this.canThrow) {
+            let bottle = new ThrowableObjects(
+                this.character.x + 50,
+                this.character.y + 50
+            );
             this.throwableObjects.push(bottle);
+            this.canThrow = false;
+            setTimeout(() => {
+                this.canThrow = true;
+            }, 500);
         }
     }
 
-    /**
-     * Проверяет столкновения между:
-     *  - персонажем и врагами,
-     *  - персонажем и монетами,
-     *  - бутылками и врагами.
-     * При столкновениях наносится урон или удаляются объекты, и при достижении условий
-     * вызываются экраны победы или поражения.
-     */
     checkCollisions() {
-        // Столкновения между персонажем и врагами
+        // 1. Столкновения персонажа с врагами
         this.level.enemies.forEach((enemy) => {
             if (this.character.isColling(enemy) && !enemy.isDead) {
                 this.character.hit();
                 this.statusBar.setPercentage(this.character.energy);
-                // Если энергии персонажа не осталось, игра проиграна
                 if (this.character.energy <= 0 && !this.gameEnded) {
                     this.gameEnded = true;
                     this.showGameOverScreen();
@@ -119,7 +78,7 @@ class World {
             }
         });
 
-        // Столкновения между персонажем и монетами
+        // 2. Столкновения персонажа с монетами
         this.level.coins.forEach((coin, index) => {
             if (this.character.isColliding(coin)) {
                 this.level.coins.splice(index, 1);
@@ -127,13 +86,12 @@ class World {
             }
         });
 
-        // Столкновения между бутылками и врагами
+        // 3. Столкновения бутылок с врагами
         this.throwableObjects.forEach((bottle) => {
             this.level.enemies.forEach((enemy) => {
                 if (bottle.isColling(enemy) && !enemy.isDead) {
                     if (enemy instanceof Endboss) {
-                        enemy.takeDamage(5); // Наносим урон Endboss
-                        // Если здоровье Endboss опустилось до 0, игра выиграна
+                        enemy.takeDamage(5);
                         if (enemy.health === 0 && !this.gameEnded) {
                             this.gameEnded = true;
                             this.showVictoryScreen();
@@ -146,28 +104,43 @@ class World {
         });
     }
 
+    /**
+     * Корректируем позицию камеры так, чтобы персонаж не исчезал влево.
+     */
+    updateCameraPosition() {
+        let offset = -this.character.x + 100;
+        // Если offset > 0, значит персонаж ближе к левому краю
+        if (offset > 0) {
+            offset = 0;
+        }
+        this.camera_x = offset;
+    }
+
     draw() {
+        this.updateCameraPosition();
+
         this.ctx.clearRect(0, 0, this.canvas.width, this.canvas.height);
+        // Сдвигаем «виртуальную камеру» по оси X
         this.ctx.translate(this.camera_x, 0);
 
-        // Рисуем фоновые объекты
+        // 1. Рисуем фоновые объекты
         this.addObjectsToMap(this.level.backgroundObjects);
 
-        // Возвращаем камеру в исходное положение для отрисовки статических элементов
+        // 2. Возвращаем камеру в исходное положение (статические элементы)
         this.ctx.translate(-this.camera_x, 0);
 
-        // Рисуем статус-бары (жизни, монеты)
+        // 3. Рисуем статус-бары
         this.addToMap(this.statusBar);
         this.addToMap(this.coinStatusBar);
 
-        // Сдвигаем камеру для отрисовки динамических объектов
+        // 4. Снова смещаем камеру
         this.ctx.translate(this.camera_x, 0);
 
-        // Рисуем монеты и персонажа
+        // 5. Рисуем монеты, персонажа
         this.addObjectsToMap(this.level.coins);
         this.addToMap(this.character);
 
-        // Рисуем врагов и, если Endboss, его панель здоровья
+        // 6. Рисуем врагов
         this.level.enemies.forEach((enemy) => {
             this.addToMap(enemy);
             if (enemy instanceof Endboss && enemy.x + enemy.width > -this.camera_x) {
@@ -175,11 +148,11 @@ class World {
             }
         });
 
-        // Рисуем облака и бросаемые объекты
+        // 7. Рисуем облака и бутылки
         this.addObjectsToMap(this.level.clouds);
         this.addObjectsToMap(this.throwableObjects);
 
-        // Возвращаем камеру в исходное положение
+        // 8. Возвращаем камеру в исходное положение
         this.ctx.translate(-this.camera_x, 0);
 
         // Рекурсивная перерисовка
@@ -187,9 +160,7 @@ class World {
     }
 
     addObjectsToMap(objects) {
-        objects.forEach(o => {
-            this.addToMap(o);
-        });
+        objects.forEach((obj) => this.addToMap(obj));
     }
 
     addToMap(mo) {
@@ -206,23 +177,14 @@ class World {
         }
     }
 
-    /**
-     * Метод для отображения экрана победы.
-     */
     showVictoryScreen() {
-        // Вместо alert можно отобразить экран победы, который определён в index.html
         document.getElementById('victoryScreen').style.display = 'flex';
-        // Дополнительно можно остановить игровую логику, например, установив флаг gameEnded = true
         this.gameEnded = true;
     }
-    
 
-    /**
-     * Метод для отображения экрана поражения.
-     */
     showGameOverScreen() {
-        alert("Игра проиграна!");
-        // Здесь можно добавить логику для рестарта игры, например, перезагрузку страницы:
-        // window.location.reload();
+        // Вместо alert делаем красивый экран (gameOverScreen)
+        document.getElementById('gameOverScreen').style.display = 'flex';
+        this.gameEnded = true;
     }
 }

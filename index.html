@@ -38,6 +38,7 @@
             cursor: pointer;
         }
     </style>
+
     <!-- Начальные классы и зависимости -->
     <script src="./models/drawable-object.class.js"></script>
     <script src="./models/movable-object.class.js"></script>
@@ -51,17 +52,17 @@
     <script src="./models/keyboard.class.js"></script>
     <script src="./models/level.class.js"></script>
 
-<!-- Загружаем Endboss, так как он нужен level1.js -->
+    <!-- Загружаем Endboss, так как он нужен level1.js -->
     <script src="./models/endboss.class.js"></script>
     <script src="./models/throwable-objects.class.js"></script>
 
-<!-- Загружаем уровень, который использует Endboss -->
+    <!-- Загружаем уровень, который использует Endboss -->
     <script src="./models/levels/level1.js"></script>
 
-<!-- Теперь загружаем World, который использует level1 -->
+    <!-- Теперь загружаем World, который использует level1 -->
     <script src="./models/world.class.js"></script>
 
-<!-- И, наконец, наш главный файл игры -->
+    <!-- И, наконец, наш главный файл игры -->
     <script src="./game.js"></script>
 
     <script>
@@ -70,8 +71,7 @@
             window.location.reload();
         }
 
-        // Функции для показа экранов победы и поражения.
-        // Эти функции можно вызывать из логики игры (например, из world.class.js)
+        // Функции для показа экранов победы и поражения (если захотите вызывать напрямую)
         function showVictoryScreen() {
             document.getElementById('victoryScreen').style.display = 'flex';
         }
@@ -87,14 +87,14 @@
 
     <!-- Экран победы -->
     <div id="victoryScreen" class="screen" style="display:none;">
-        <h2>Вы победили!</h2>
-        <button onclick="restartGame()">Играть снова</button>
+        <h2>V I N N E R !</h2>
+        <button onclick="restartGame()">NEW GAME</button>
     </div>
 
     <!-- Экран поражения -->
     <div id="gameOverScreen" class="screen" style="display:none;">
-        <h2>Вы проиграли!</h2>
-        <button onclick="restartGame()">Попробовать снова</button>
+        <h2>L O S E R ! Shame on YOU!!!</h2>
+        <button onclick="restartGame()">RESTART THE GAME</button>
     </div>
 </body>
 

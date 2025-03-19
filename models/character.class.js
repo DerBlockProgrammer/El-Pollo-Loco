@@ -1,7 +1,7 @@
 class Character extends MovableObject {
     height = 270;
     y = 170;
-    speed = 10;
+    speed = 5;
     IMAGES_WALKING = [
         'img/2_character_pepe/2_walk/W-21.png',
         'img/2_character_pepe/2_walk/W-22.png',
@@ -47,7 +47,6 @@ class Character extends MovableObject {
     ];
 
     collectedCoins = 0;
-    world;
     walking_sound = new Audio('audio/walking.mp3');
 
     constructor() {
@@ -57,104 +56,79 @@ class Character extends MovableObject {
         this.loadImages(this.IMAGES_DEAD);
         this.loadImages(this.IMAGES_HURT);
         this.loadImages(this.IMAGES_IDLE);
-        this.applyGravity(); // Предполагается, что метод applyGravity() реализован в родительском классе
+        this.applyGravity(); 
         this.animate();
     }
 
-    // Проверяет столкновение с монетами и собирает их
+    // Проверка и сбор монет
     checkCoinCollision() {
-        if (!this.world || !this.world.coins) {
-            return; // Если world или массив coins не определены, выходим из метода
-        }
+        if (!this.world || !this.world.coins) return;
         this.world.coins.forEach((coin, index) => {
-            if (this.isColliding(coin)) { // Проверка столкновения с монетой
-                this.world.coins.splice(index, 1); // Удаляем монету из массива
-                this.collectCoin(); // Обновляем счетчик монет
+            if (this.isColliding(coin)) {
+                this.world.coins.splice(index, 1);
+                this.collectCoin();
             }
         });
     }
-    
 
     collectCoin() {
         this.collectedCoins++;
-        let percentage = Math.min(this.collectedCoins * 20, 100); // Пересчет в проценты (максимум 100%)
-        this.world.coinStatusBar.setPercentage(percentage); // Обновляем отображение статуса монет
+        let percentage = Math.min(this.collectedCoins * 20, 100);
+        this.world.coinStatusBar.setPercentage(percentage);
     }
 
-    /**
-     * Метод для прыжка.
-     * Если персонаж находится на земле (isAboveGround() возвращает false),
-     * задаем ему вертикальную скорость для прыжка.
-     */
+    // Прыжок, если персонаж на земле
     jump() {
         if (!this.isAboveGround()) {
-            // Задаем начальное значение вертикальной скорости (например, 30)
             this.speedY = 30;
         }
     }
 
-    /**
-     * Метод для броска бутылки.
-     * Создает новый объект бутылки и добавляет его в массив throwableObjects мира.
-     */
-    throwBottle() {
-        // Позиционируем бутылку относительно персонажа.
-        let bottle = new ThrowableObjects(this.x + 50, this.y + 50);
-        // Добавляем бутылку в массив бросаемых объектов
-        this.world.throwableObjects.push(bottle);
-        // Можно добавить звук или анимацию броска, если необходимо.
+    // Базовый метод движения влево, ограничиваем x >= 0
+    moveLeft() {
+        this.x = Math.max(0, this.x - this.speed);
+    }
+
+    // Базовый метод движения вправо
+    moveRight() {
+        this.x += this.speed;
     }
 
     animate() {
+        // Логика движения (60 кадров/сек)
         setInterval(() => {
-            // Если this.world или this.world.keyboard ещё не установлены, пропускаем этот кадр
             if (!this.world || !this.world.keyboard) return;
-    
             this.checkCoinCollision();
-            // Приостанавливаем звук ходьбы, чтобы избежать наложения
             this.walking_sound.pause();
-    
-            // Движение вправо
+
             if (this.world.keyboard.RIGHT && this.x < this.world.level.level_end_x) {
                 this.moveRight();
                 this.otherDirection = false;
-                this.playAnimation(this.IMAGES_WALKING);
                 this.walking_sound.play();
-            }
-            // Движение влево
-            else if (this.world.keyboard.LEFT && this.x > 0) {
+            } else if (this.world.keyboard.LEFT && this.x > 0) {
                 this.moveLeft();
                 this.otherDirection = true;
-                this.playAnimation(this.IMAGES_WALKING);
                 this.walking_sound.play();
-            }
-            // Прыжок при нажатии пробела, если персонаж на земле
-            else if (this.world.keyboard.SPACE && !this.isAboveGround()) {
+            } else if (this.world.keyboard.SPACE && !this.isAboveGround()) {
                 this.jump();
-                this.playAnimation(this.IMAGES_JUMPING); 
             }
-            // Бросок бутылки при нажатии клавиши "D"
-            else if (this.world.keyboard.D) {
-                this.throwBottle();
-            }
-            // Если персонаж стоит на месте на земле, проигрываем анимацию бездействия
-            else if (!this.isAboveGround()) {
-                this.playAnimation(this.IMAGES_IDLE);
-            }
-    
+            // Убрали логику броска бутылок (D), т.к. она теперь в world.class.js
+        }, 1000 / 60);
+
+        // Смена кадров анимации каждые 150 мс
+        setInterval(() => {
+            if (!this.world) return;
             if (this.isHurt()) {
                 this.playAnimation(this.IMAGES_HURT);
-            }
-            if (this.isDead()) {
+            } else if (this.isDead()) {
                 this.playAnimation(this.IMAGES_DEAD);
-            }
-            if (this.isAboveGround()) {
+            } else if (this.isAboveGround()) {
                 this.playAnimation(this.IMAGES_JUMPING);
+            } else if (this.world.keyboard?.RIGHT || this.world.keyboard?.LEFT) {
+                this.playAnimation(this.IMAGES_WALKING);
+            } else {
+                this.playAnimation(this.IMAGES_IDLE);
             }
-    
-            // Обновление позиции камеры
-            this.world.camera_x = -this.x + 100;
-        }, 1000 / 60); 
+        }, 150);
     }
-    
 }
