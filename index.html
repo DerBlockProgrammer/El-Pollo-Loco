@@ -10,12 +10,32 @@
         href="https://fonts.googleapis.com/css2?family=Edu+AU+VIC+WA+NT+Guides:wght@400..700&family=Ga+Maamli&display=swap"
         rel="stylesheet">
     <link rel="stylesheet" href="./style.css">
-    <title>El PollomLoco</title>
+    <title>El Pollo Loco</title>
     <style>
         @font-face {
             font-family: 'retro';
             src: url('./fonts/retroGaming.ttf') format('truetype');
-            /* Chrome 4+, Firefox 3.5, Opera 10+, Safari 3—5 */
+        }
+        /* Стили для экранов победы и поражения */
+        .screen {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.8);
+            color: #fff;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            z-index: 100;
+        }
+        .screen button {
+            font-size: 20px;
+            padding: 10px 20px;
+            margin-top: 20px;
+            cursor: pointer;
         }
     </style>
     <script src="./models/drawable-object.class.js"></script>
@@ -31,36 +51,41 @@
     <script src="./models/keyboard.class.js"></script>
     <script src="./models/level.class.js"></script>
     <script src="./models/throwable-objects.class.js"></script>
-
-
-
     <script src="./models/endboss.class.js"></script>
-
-
     <script src="./models/levels/level1.js"></script>
     <script src="./game.js"></script>
+    <script>
+        // Функция рестарта игры – перезагружает страницу
+        function restartGame() {
+            window.location.reload();
+        }
 
-
+        // Функции для показа экранов победы и поражения.
+        // Эти функции можно вызывать из логики игры (например, в world.class.js вместо alert())
+        function showVictoryScreen() {
+            document.getElementById('victoryScreen').style.display = 'flex';
+        }
+        function showGameOverScreen() {
+            document.getElementById('gameOverScreen').style.display = 'flex';
+        }
+    </script>
 </head>
 
 <body onload="init()">
+    <h1>El Pollo Loco</h1>
+    <canvas id="canvas" width="720px" height="480px"></canvas>
 
-  
-        <h1>El Pollo Loco</h1>
+    <!-- Экран победы -->
+    <div id="victoryScreen" class="screen" style="display:none;">
+        <h2>Вы победили!</h2>
+        <button onclick="restartGame()">Играть снова</button>
+    </div>
 
-       
-   
-   
-   
-    <canvas id="canvas" width="720px" height="480px">
-        
-
-    </canvas>
-   
- 
-      
+    <!-- Экран поражения -->
+    <div id="gameOverScreen" class="screen" style="display:none;">
+        <h2>Вы проиграли!</h2>
+        <button onclick="restartGame()">Попробовать снова</button>
+    </div>
 </body>
-
-
 
 </html>
