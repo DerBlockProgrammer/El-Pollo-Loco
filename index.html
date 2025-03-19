@@ -1,101 +1,110 @@
 <!DOCTYPE html>
 <html lang="en">
-
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link
-        href="https://fonts.googleapis.com/css2?family=Edu+AU+VIC+WA+NT+Guides:wght@400..700&family=Ga+Maamli&display=swap"
-        rel="stylesheet">
-    <link rel="stylesheet" href="./style.css">
-    <title>El Pollo Loco</title>
-    <style>
-        @font-face {
-            font-family: 'retro';
-            src: url('./fonts/retroGaming.ttf') format('truetype');
-        }
-        /* Стили для экранов победы и поражения */
-        .screen {
-            position: absolute;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background: rgba(0, 0, 0, 0.8);
-            color: #fff;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
-            z-index: 100;
-        }
-        .screen button {
-            font-size: 20px;
-            padding: 10px 20px;
-            margin-top: 20px;
-            cursor: pointer;
-        }
-    </style>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Edu+AU+VIC+WA+NT+Guides:wght@400..700&family=Ga+Maamli&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="./style.css">
+  <title>El Pollo Loco</title>
+  <style>
+    @font-face {
+      font-family: 'retro';
+      src: url('./fonts/retroGaming.ttf') format('truetype');
+    }
+    /* Стили для экранов победы и поражения */
+    .screen {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: linear-gradient(135deg, rgba(0, 0, 0, 0.9) 0%, rgba(30, 30, 30, 0.9) 100%);
+      color: #fff;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      z-index: 100;
+      opacity: 0;
+      animation: fadeIn 1s forwards;
+    }
+    @keyframes fadeIn {
+      to { opacity: 1; }
+    }
+    .screen h2 {
+      font-family: 'retro', sans-serif;
+      font-size: 48px;
+      letter-spacing: 2px;
+      margin-bottom: 20px;
+    }
+    .screen button {
+      font-size: 20px;
+      padding: 10px 20px;
+      border: none;
+      background-color: #ffcc00;
+      color: #000;
+      font-family: 'retro', sans-serif;
+      cursor: pointer;
+      transition: background-color 0.3s;
+    }
+    .screen button:hover {
+      background-color: #ffdd33;
+    }
+  </style>
 
-    <!-- Начальные классы и зависимости -->
-    <script src="./models/drawable-object.class.js"></script>
-    <script src="./models/movable-object.class.js"></script>
-    <script src="./models/coin.class.js"></script>
-    <script src="./models/character.class.js"></script>
-    <script src="./models/chicken.class.js"></script>
-    <script src="./models/status-bar.class.js"></script>
-    <script src="./models/coins-bar.class.js"></script>
-    <script src="./models/clouds.class.js"></script>
-    <script src="./models/background-objects.class.js"></script>
-    <script src="./models/keyboard.class.js"></script>
-    <script src="./models/level.class.js"></script>
+  <!-- Начальные классы и зависимости -->
+  <script src="./models/drawable-object.class.js"></script>
+  <script src="./models/movable-object.class.js"></script>
+  <script src="./models/coin.class.js"></script>
+  <script src="./models/character.class.js"></script>
+  <script src="./models/chicken.class.js"></script>
+  <script src="./models/status-bar.class.js"></script>
+  <script src="./models/coins-bar.class.js"></script>
+  <script src="./models/clouds.class.js"></script>
+  <script src="./models/background-objects.class.js"></script>
+  <script src="./models/keyboard.class.js"></script>
+  <script src="./models/level.class.js"></script>
+  <!-- Загружаем Endboss и бросаемые объекты -->
+  <script src="./models/endboss.class.js"></script>
+  <script src="./models/throwable-objects.class.js"></script>
+  <!-- Загружаем уровень, который использует Endboss -->
+  <script src="./models/levels/level1.js"></script>
+  <!-- Теперь загружаем World, который использует level1 -->
+  <script src="./models/world.class.js"></script>
+  <!-- И, наконец, наш главный файл игры -->
+  <script src="./game.js"></script>
 
-    <!-- Загружаем Endboss, так как он нужен level1.js -->
-    <script src="./models/endboss.class.js"></script>
-    <script src="./models/throwable-objects.class.js"></script>
+  <script>
+    // Функция рестарта игры – перезагружает страницу
+    function restartGame() {
+      window.location.reload();
+    }
 
-    <!-- Загружаем уровень, который использует Endboss -->
-    <script src="./models/levels/level1.js"></script>
-
-    <!-- Теперь загружаем World, который использует level1 -->
-    <script src="./models/world.class.js"></script>
-
-    <!-- И, наконец, наш главный файл игры -->
-    <script src="./game.js"></script>
-
-    <script>
-        // Функция рестарта игры – перезагружает страницу
-        function restartGame() {
-            window.location.reload();
-        }
-
-        // Функции для показа экранов победы и поражения (если захотите вызывать напрямую)
-        function showVictoryScreen() {
-            document.getElementById('victoryScreen').style.display = 'flex';
-        }
-        function showGameOverScreen() {
-            document.getElementById('gameOverScreen').style.display = 'flex';
-        }
-    </script>
+    // Функции для показа экранов победы и поражения
+    function showVictoryScreen() {
+      document.getElementById('victoryScreen').style.display = 'flex';
+    }
+    function showGameOverScreen() {
+      document.getElementById('gameOverScreen').style.display = 'flex';
+    }
+  </script>
 </head>
-
 <body onload="init()">
-    <h1>El Pollo Loco</h1>
-    <canvas id="canvas" width="720px" height="480px"></canvas>
+  <h1>El Pollo Loco</h1>
+  <canvas id="canvas" width="720px" height="480px"></canvas>
 
-    <!-- Экран победы -->
-    <div id="victoryScreen" class="screen" style="display:none;">
-        <h2>V I N N E R !</h2>
-        <button onclick="restartGame()">NEW GAME</button>
-    </div>
+  <!-- Экран победы -->
+  <div id="victoryScreen" class="screen" style="display:none;">
+    <h2>V I N N E R !</h2>
+    <button onclick="restartGame()">NEW GAME</button>
+  </div>
 
-    <!-- Экран поражения -->
-    <div id="gameOverScreen" class="screen" style="display:none;">
-        <h2>L O S E R ! Shame on YOU!!!</h2>
-        <button onclick="restartGame()">RESTART THE GAME</button>
-    </div>
+  <!-- Экран поражения -->
+  <div id="gameOverScreen" class="screen" style="display:none;">
+    <h2>L O S E R ! Shame on YOU!!!</h2>
+    <button onclick="restartGame()">RESTART THE GAME</button>
+  </div>
 </body>
-
 </html>

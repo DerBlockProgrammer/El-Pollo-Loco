@@ -1,9 +1,8 @@
-class Keyboard{
+class Keyboard {
     LEFT = false;
     RIGHT = false;
     UP = false;
-   DOWN = false;
+    DOWN = false;
     SPACE = false;
-    0 = false;
-
+    D = false;
 }

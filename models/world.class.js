@@ -37,6 +37,9 @@ class World {
         this.level.enemies.forEach((enemy) => {
             if (enemy instanceof Endboss) {
                 enemy.world = this;
+            } else {
+                // Если враг не босс, предположим, что в его классе реализован метод takeDamage()
+                enemy.world = this;
             }
         });
     }
@@ -50,13 +53,17 @@ class World {
         }, 200);
     }
 
+    /**
+     * Проверяет, нажата ли клавиша для броска бутылок, и создает новый объект бутылки.
+     * Бросок происходит только один раз за 500 мс благодаря флагу canThrow.
+     */
     checkThrowObjects() {
-        // При нажатии D и флаге canThrow создаём бутылку
         if (this.keyboard.D && this.canThrow) {
             let bottle = new ThrowableObjects(
                 this.character.x + 50,
                 this.character.y + 50
             );
+            bottle.hasHit = false; // Отмечаем, что бутылка ещё не нанесла урон
             this.throwableObjects.push(bottle);
             this.canThrow = false;
             setTimeout(() => {
@@ -65,6 +72,12 @@ class World {
         }
     }
 
+    /**
+     * Проверяет столкновения:
+     * 1. Персонажа с врагами (наносит урон и обновляет статус).
+     * 2. Персонажа с монетами (собирает монеты).
+     * 3. Бутылок с врагами (наносит урон один раз за бутылку).
+     */
     checkCollisions() {
         // 1. Столкновения персонажа с врагами
         this.level.enemies.forEach((enemy) => {
@@ -89,27 +102,32 @@ class World {
         // 3. Столкновения бутылок с врагами
         this.throwableObjects.forEach((bottle) => {
             this.level.enemies.forEach((enemy) => {
-                if (bottle.isColling(enemy) && !enemy.isDead) {
+                if (!bottle.hasHit && bottle.isColling(enemy) && !enemy.isDead) {
+                    // Наносим урон бутылкой
                     if (enemy instanceof Endboss) {
-                        enemy.takeDamage(5);
+                        enemy.takeDamage(15);
                         if (enemy.health === 0 && !this.gameEnded) {
                             this.gameEnded = true;
                             this.showVictoryScreen();
                         }
                     } else {
-                        enemy.die();
+                        // Для не-боссовых врагов наносим урон через takeDamage(), а не мгновенную смерть
+                        enemy.takeDamage(15);
                     }
+                    bottle.hasHit = true;
                 }
             });
         });
+        // Удаляем бутылки, которые уже нанесли урон
+        this.throwableObjects = this.throwableObjects.filter(bottle => !bottle.hasHit);
     }
 
     /**
-     * Корректируем позицию камеры так, чтобы персонаж не исчезал влево.
+     * Обновляет позицию камеры так, чтобы персонаж не исчезал при движении влево.
+     * Если персонаж ближе 100 пикселей к левому краю, камера не смещается вправо.
      */
     updateCameraPosition() {
         let offset = -this.character.x + 100;
-        // Если offset > 0, значит персонаж ближе к левому краю
         if (offset > 0) {
             offset = 0;
         }
@@ -118,29 +136,25 @@ class World {
 
     draw() {
         this.updateCameraPosition();
-
         this.ctx.clearRect(0, 0, this.canvas.width, this.canvas.height);
-        // Сдвигаем «виртуальную камеру» по оси X
+
+        // Сдвигаем "виртуальную камеру"
         this.ctx.translate(this.camera_x, 0);
 
         // 1. Рисуем фоновые объекты
         this.addObjectsToMap(this.level.backgroundObjects);
 
-        // 2. Возвращаем камеру в исходное положение (статические элементы)
+        // 2. Возвращаем камеру для статических элементов
         this.ctx.translate(-this.camera_x, 0);
-
-        // 3. Рисуем статус-бары
         this.addToMap(this.statusBar);
         this.addToMap(this.coinStatusBar);
 
-        // 4. Снова смещаем камеру
+        // 3. Снова смещаем камеру для динамических объектов
         this.ctx.translate(this.camera_x, 0);
-
-        // 5. Рисуем монеты, персонажа
         this.addObjectsToMap(this.level.coins);
         this.addToMap(this.character);
 
-        // 6. Рисуем врагов
+        // 4. Рисуем врагов и, если Endboss, его статус-бар
         this.level.enemies.forEach((enemy) => {
             this.addToMap(enemy);
             if (enemy instanceof Endboss && enemy.x + enemy.width > -this.camera_x) {
@@ -148,14 +162,13 @@ class World {
             }
         });
 
-        // 7. Рисуем облака и бутылки
+        // 5. Рисуем облака и бутылки
         this.addObjectsToMap(this.level.clouds);
         this.addObjectsToMap(this.throwableObjects);
 
-        // 8. Возвращаем камеру в исходное положение
+        // 6. Возвращаем камеру в исходное положение
         this.ctx.translate(-this.camera_x, 0);
 
-        // Рекурсивная перерисовка
         requestAnimationFrame(() => this.draw());
     }
 
@@ -183,7 +196,6 @@ class World {
     }
 
     showGameOverScreen() {
-        // Вместо alert делаем красивый экран (gameOverScreen)
         document.getElementById('gameOverScreen').style.display = 'flex';
         this.gameEnded = true;
     }

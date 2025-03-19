@@ -1,4 +1,4 @@
-class MovableObject extends DrawableObject{
+class MovableObject extends DrawableObject {
     speed = 0.15;
     otherDirection = false;
     speedY = 0;
@@ -12,59 +12,49 @@ class MovableObject extends DrawableObject{
                 this.y -= this.speedY;
                 this.speedY -= this.accelration;
             }
-
         }, 1000 / 25);
-
     }
+
     isAboveGround() {
         if (this instanceof ThrowableObjects) {
             return true;
-            
-        }else{
+        } else {
             return this.y < 170;
         }
-        
     }
 
-   
-  
-
-
-    isColling(mo){
+    isColling(mo) {
         return this.x + this.width > mo.x &&
-        this.y + this.height > mo.y &&
-        this.x < mo.x &&
-        this.y < mo.y + mo.height;
+               this.y + this.height > mo.y &&
+               this.x < mo.x &&
+               this.y < mo.y + mo.height;
     }
+
     isColliding(mo) {
         return this.x + this.width > mo.x &&
                this.y + this.height > mo.y &&
                this.x < mo.x + mo.width &&
                this.y < mo.y + mo.height;
     }
-    
 
-    hit(){
-
+    hit() {
         this.energy -= 5;
         if (this.energy < 0) {
-            this.energy =0;
-            } else{
-                this.lastHit = new Date().getTime();
-            }
+            this.energy = 0;
+        } else {
+            this.lastHit = new Date().getTime();
+        }
     }
 
-    isHurt(){
-        let timepassed = new Date().getTime()-this.lastHit; // Differenz in Sekunden
-        timepassed = timepassed / 1000; // Differenz in Sekunden
+    isHurt() {
+        let timepassed = new Date().getTime() - this.lastHit;
+        timepassed = timepassed / 1000;
         return timepassed < 1.5;
     }
 
-    isDead(){
+    isDead() {
         return this.energy == 0;
     }
-
- 
 
     playAnimation(images) {
         let i = this.currentImage % images.length;
@@ -73,24 +63,16 @@ class MovableObject extends DrawableObject{
         this.currentImage++;
     }
 
-
     moveRight() {
         this.x += this.speed;
-       
-
     }
 
+    // Изменено: теперь x не становится меньше 0
     moveLeft() {
-        this.x -= this.speed;
-        
-       
-        
-
+        this.x = Math.max(0, this.x - this.speed);
     }
+
     jump() {
         this.speedY = 30;
-
     }
-
 }
-
