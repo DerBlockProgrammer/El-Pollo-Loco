@@ -3,8 +3,7 @@ class Chicken extends MovableObject {
     height = 70;
     width = 80;
     isDead = false;
-    deathAnimationStarted = false;
-    deathSpeed = 5;
+    energy = 15; // Добавляем свойство "здоровье"
 
     IMAGES_WALKING = [
         'img/3_enemies_chicken/chicken_normal/1_walk/1_w.png',
@@ -27,10 +26,15 @@ class Chicken extends MovableObject {
 
         // Настраиваем громкость, но не воспроизводим автоматически
         this.walking_chicken.volume = 0.1;
-        // Удаляем автозапуск звука, чтобы избежать ошибок в браузерах
-        // this.walking_chicken.play(); 
-        // this.walking_chicken.pause();
     }
+
+    // Новый метод для получения урона
+    takeDamage(damage) {
+    if (this.isDead) return;
+    console.log('Chicken получил урон:', damage);
+    this.die();
+    }
+        
 
     animate() {
         // Движение влево
@@ -45,10 +49,8 @@ class Chicken extends MovableObject {
     }
 
     die() {
-        // Если уже мертва, ничего не делаем
         if (this.isDead) return;
         this.isDead = true;
-
         // "Анимация смерти": курица "улетает" вверх
         let flyUpInterval = setInterval(() => {
             this.y -= 5;
