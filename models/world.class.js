@@ -95,13 +95,13 @@ class World {
         });
 
         // 2. Столкновения персонажа с монетами
-        this.level.coins.forEach((coin, index) => {
-            if (this.character.isColliding(coin)) {
-                this.level.coins.splice(index, 1);
+        for (let i = this.level.coins.length - 1; i >= 0; i--) {
+            if (this.character.isColliding(this.level.coins[i])) {
+                this.level.coins.splice(i, 1);
                 this.character.collectCoin();
             }
-        });
-
+        }
+        
         // 3. Столкновения бутылок с врагами
         this.throwableObjects.forEach((bottle) => {
             this.level.enemies.forEach((enemy) => {
