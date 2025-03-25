@@ -30,10 +30,14 @@ class Chicken extends MovableObject {
 
     // Новый метод для получения урона
     takeDamage(damage) {
-    if (this.isDead) return;
-    console.log('Chicken получил урон:', damage);
-    this.die();
+        if (this.isDead) return;
+        this.energy -= damage;
+        console.log('Chicken получил урон:', damage, 'Оставшаяся энергия:', this.energy);
+        if (this.energy <= 0) {
+            this.die();
+        }
     }
+    
         
 
     animate() {
