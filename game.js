@@ -3,20 +3,85 @@ let world;
 let keyboard = new Keyboard();
 
 function init() {
-
+    // Получаем элемент canvas и создаём мир
     canvas = document.getElementById('canvas');
     world = new World(canvas, keyboard);
-    ctx = canvas.getContext('2d');
+    let ctx = canvas.getContext('2d');
 
+    // Пример отрисовки изображения (необязательно)
+    let characterImage = new Image();
+    characterImage.src = 'img/2_character_pepe/2_walk/W-24.png';
+    characterImage.onload = function() {
+        ctx.drawImage(characterImage, 20, 20, 50, 100);
+    };
 
-    // character.src = '../img/img/2_character_pepe/2_walk/W-21.png';
-    // ctx.drawImage(character.src, 20, 20, 50, 100);
+    console.log('My Character is', world.character);
 
-    console.log('My Character is', world.Character);
+    // Регулятор громкости
+    const volumeSlider = document.getElementById('volumeSlider');
+    if (volumeSlider) {
+        volumeSlider.addEventListener('input', (e) => {
+            let vol = parseFloat(e.target.value);
+            setVolume(vol);
+            localStorage.setItem('gameVolume', vol);
+        });
+
+        let savedVol = localStorage.getItem('gameVolume');
+        if (savedVol !== null) {
+            volumeSlider.value = savedVol;
+            setVolume(parseFloat(savedVol));
+        }
+    }
 }
 
+/**
+ * Функция для установки громкости у фоновой музыки и других аудиообъектов.
+ */
+function setVolume(vol) {
+    if (world && world.backgroundMusic) {
+        world.backgroundMusic.volume = vol;
+    }
+    if (world && world.character && world.character.walking_sound) {
+        world.character.walking_sound.volume = vol;
+    }
+    // Добавьте другие звуки, если нужно
+}
+
+/**
+ * Функция, вызываемая при завершении игры (победа или поражение).
+ * - Запрашивает имя игрока
+ * - Сохраняет результат (количество собранных монет) через saveScore()
+ * - Обновляет таблицу лидеров через showLeaderboard()
+ */
+function endGame() {
+    if (!world || !world.character) return;
+    let playerName = prompt("Введите ваше имя для таблицы лидеров:");
+    let score = world.character.collectedCoins || 0;
+    // Сохраняем результат (предполагается наличие scoreManager.js с функцией saveScore)
+    saveScore(playerName, score);
+    // Обновляем таблицу лидеров (функция showLeaderboard должна быть определена)
+    showLeaderboard();
+}
+
+/**
+ * Отображает таблицу лидеров (Top 20) в элементе #leaderboardList.
+ */
+function showLeaderboard() {
+    // Предполагается наличие функции getLeaderboard() в scoreManager.js
+    let leaderboard = getLeaderboard();
+    let listElement = document.getElementById('leaderboardList');
+    if (!listElement) return;
+
+    listElement.innerHTML = "";
+    leaderboard.forEach((entry, index) => {
+        const li = document.createElement('li');
+        li.textContent = `${index + 1}. ${entry.name} — ${entry.score} очков`;
+        listElement.appendChild(li);
+    });
+}
+
+// Обработчики клавиатуры
 window.addEventListener("keydown", (e) => {
-   
     if (e.keyCode == 39) {
         keyboard.RIGHT = true;
     }
@@ -35,8 +100,8 @@ window.addEventListener("keydown", (e) => {
     if (e.keyCode == 68) {
         keyboard.D = true;
     }
-   
 });
+
 window.addEventListener("keyup", (e) => {
     if (e.keyCode == 39) {
         keyboard.RIGHT = false;

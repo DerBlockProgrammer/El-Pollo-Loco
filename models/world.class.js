@@ -11,158 +11,184 @@ class World {
     musicInterval;
     coinStatusBar = new CoinStatusBar();
     coins = [];
-
-
+    gameEnded = false; // Флаг, сигнализирующий о завершении игры
 
     constructor(canvas, keyboard) {
+        this.canThrow = true; // Флаг для управления частотой бросков
         this.ctx = canvas.getContext('2d');
         this.canvas = canvas;
         this.keyboard = keyboard;
-        this.backgroundMusic = new Audio('./audio/mexikan.mp3'); // Pfad zur Musikdatei
+        // Задаём гравитацию для мира
+        this.gravity = 2.5;
+
+        // Настройка фоновой музыки (не запускаем автоматически)
+        this.backgroundMusic = new Audio('./audio/mexikan.mp3');
         this.backgroundMusic.loop = true;
         this.backgroundMusic.volume = 0.1;
-        this.backgroundMusic.play();
-        this.setupMusic();
-        this.coinStatusBar = new CoinStatusBar(); // Hinzufügen der Coin-Bar
-        this.draw();
-        this.setWorld();
-        this.run();
 
+        // Инициализируем панель для монет
+        this.coinStatusBar = new CoinStatusBar();
+
+        // Запускаем основной цикл отрисовки
+        this.draw();
+        // Устанавливаем ссылки в персонажа и врагов
+        this.setWorld();
+        // Запускаем проверку коллизий и бросков
+        this.run();
     }
 
     setWorld() {
         this.character.world = this;
         this.level.enemies.forEach((enemy) => {
-            if (enemy instanceof Endboss) {
-                enemy.world = this; // Endboss erhält Zugriff auf die World-Instanz
-            }
+            enemy.world = this;
         });
-
     }
 
     run() {
         setInterval(() => {
-            this.checkCollisions();
-            this.checkThrowObjects();
-
+            if (!this.gameEnded) {
+                this.checkCollisions();
+                this.checkThrowObjects();
+            }
         }, 200);
     }
 
-    //Musik Intervall
-    setupMusic() {
-        const playDuration = 5000;
-        const pauseDuration = 3000;
-
-        this.musicInterval = setInterval(() => {
-            this.backgroundMusic.play();
-
-
-            setTimeout(() => {
-                this.backgroundMusic.pause();
-                this.backgroundMusic.currentTime = 0;
-            }, playDuration);
-        }, playDuration + pauseDuration);
-    }
-
+    /**
+     * Проверяет, нажата ли клавиша для броска бутылок, и создает новый объект бутылки.
+     * Бросок происходит только один раз за 500 мс (canThrow).
+     */
     checkThrowObjects() {
-        if (this.keyboard.D) {
-            let bottle = new ThrowableObjects(this.character.x + 100, this.character.y + 100);
+        if (this.keyboard.D && this.canThrow) {
+            let bottle = new ThrowableObjects(
+                this.character.x + 50,
+                this.character.y + 50
+            );
+            bottle.hasHit = false;
             this.throwableObjects.push(bottle);
-
+            this.canThrow = false;
+            setTimeout(() => {
+                this.canThrow = true;
+            }, 500);
         }
     }
 
+    /**
+     * Проверяет столкновения:
+     * 1. Персонажа с врагами.
+     * 2. Персонажа с монетами.
+     * 3. Бутылок с врагами.
+     */
     checkCollisions() {
+        // 1. Столкновения персонажа с врагами
         this.level.enemies.forEach((enemy) => {
-            if (this.character.isColling(enemy) && !enemy.isDead) {
+            if (this.character.isColliding(enemy) && !enemy.isDead) {
                 this.character.hit();
                 this.statusBar.setPercentage(this.character.energy);
+                // Если энергия <= 0, персонаж проиграл
+                if (this.character.energy <= 0 && !this.gameEnded) {
+                    this.gameEnded = true;
+                    this.showGameOverScreen();
+                    // Вызываем endGame() для сохранения результата и обновления лидеров
+                    endGame();
+                }
             }
-            
-
         });
-        
 
+        // 2. Столкновения персонажа с монетами
+        this.level.coins.forEach((coin, index) => {
+            if (this.character.isColliding(coin)) {
+                this.level.coins.splice(index, 1);
+                this.character.collectCoin();
+            }
+        });
 
-        // this.level.coins.forEach((coin, index) => {
-        //     if (this.character.isColliding(coin)) {
-        //         this.level.coins.splice(index, 1); // Coin aus der Liste entfernen
-        //         this.character.collectCoin(); // Coin sammeln
-        //     }
-        // });
-
+        // 3. Столкновения бутылок с врагами
         this.throwableObjects.forEach((bottle) => {
             this.level.enemies.forEach((enemy) => {
-                if (bottle.isColling(enemy) && !enemy.isDead) {
+                if (!bottle.hasHit && bottle.isColliding(enemy) && !enemy.isDead) {
+                    // Если это босс
                     if (enemy instanceof Endboss) {
-                        enemy.takeDamage(5);
-                    }else {
-                        enemy.die();
+                        enemy.takeDamage(15);
+                        if (enemy.health === 0 && !this.gameEnded) {
+                            this.gameEnded = true;
+                            this.showVictoryScreen();
+                            endGame(); // Сохраняем результат, например, score = this.character.collectedCoins
+                        }
+                    } else {
+                        enemy.takeDamage(15);
                     }
-                  
-
+                    bottle.hasHit = true;
                 }
             });
         });
 
-
+        // Удаляем бутылки, которые уже нанесли урон
+        this.throwableObjects = this.throwableObjects.filter(bottle => !bottle.hasHit);
     }
-    draw() {
 
+    /**
+     * Обновляет позицию камеры так, чтобы персонаж не исчезал при движении влево,
+     * и чтобы камера не выходила за границы уровня.
+     */
+    updateCameraPosition() {
+        let offset = -this.character.x + 100;
+        // Ограничение слева
+        if (this.character.x < 100) {
+            offset = 0;
+        }
+        // Ограничение справа (если есть level_end_x)
+        if (this.character.x > this.level.level_end_x - this.canvas.width + 100) {
+            offset = -this.level.level_end_x + this.canvas.width - 100;
+        }
+        this.camera_x = offset;
+    }
+
+    draw() {
+        this.updateCameraPosition();
         this.ctx.clearRect(0, 0, this.canvas.width, this.canvas.height);
+
+        // Смещаем камеру
         this.ctx.translate(this.camera_x, 0);
 
-        //HintergrundObjekte zeichnen
+        // 1. Рисуем фоновые объекты
         this.addObjectsToMap(this.level.backgroundObjects);
 
-
-
-        this.ctx.translate(-this.camera_x, 0); // zurück kamera, Objekte fixieren
-
-        //HintergrundObjekte zeichnen
+        // 2. Возвращаем камеру для статических элементов
+        this.ctx.translate(-this.camera_x, 0);
         this.addToMap(this.statusBar);
         this.addToMap(this.coinStatusBar);
 
-        // Coins und Charakter zeichnen
-        this.ctx.translate(this.camera_x, 0); //vorwärts kamera
+        // 3. Снова смещаем камеру для динамических объектов
+        this.ctx.translate(this.camera_x, 0);
         this.addObjectsToMap(this.level.coins);
         this.addToMap(this.character);
 
-        // Endboss und StatusBar zeichnen
+        // 4. Рисуем врагов и (если Endboss) его статус-бар
         this.level.enemies.forEach((enemy) => {
-            this.addToMap(enemy); // Zeichne Feind
+            this.addToMap(enemy);
             if (enemy instanceof Endboss && enemy.x + enemy.width > -this.camera_x) {
-                enemy.drawStatusBar(this.ctx); // Zeichne StatusBar des Endbosses
+                enemy.drawStatusBar(this.ctx);
             }
         });
 
-        // Wolken und Objekte wie Flaschen zeichnen
+        // 5. Рисуем облака и бросаемые объекты
         this.addObjectsToMap(this.level.clouds);
         this.addObjectsToMap(this.throwableObjects);
+
+        // Возвращаем камеру
         this.ctx.translate(-this.camera_x, 0);
 
-
-        //Draw() wird immer wieder aufgerufen
-        let self = this;
-        requestAnimationFrame(function () {
-            self.draw();
-        });
+        requestAnimationFrame(() => this.draw());
     }
-
 
     addObjectsToMap(objects) {
-        objects.forEach(o => {
-            this.addToMap(o);
-        });
-
+        objects.forEach((obj) => this.addToMap(obj));
     }
-
-
 
     addToMap(mo) {
         if (mo.otherDirection) {
             this.ctx.save();
-            this.ctx.translate(mo.x + mo.width, mo.y); // Richtige Position für Spiegelung
+            this.ctx.translate(mo.x + mo.width, mo.y);
             this.ctx.scale(-1, 1);
             mo.draw(this.ctx);
             mo.drawFrame(this.ctx);
@@ -173,7 +199,13 @@ class World {
         }
     }
 
+    showVictoryScreen() {
+        document.getElementById('victoryScreen').style.display = 'flex';
+        this.gameEnded = true;
+    }
 
+    showGameOverScreen() {
+        document.getElementById('gameOverScreen').style.display = 'flex';
+        this.gameEnded = true;
+    }
 }
-
-

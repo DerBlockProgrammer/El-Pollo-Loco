@@ -1,7 +1,7 @@
 class Character extends MovableObject {
     height = 270;
     y = 170;
-    speed = 10;
+    speed = 5;
     IMAGES_WALKING = [
         'img/2_character_pepe/2_walk/W-21.png',
         'img/2_character_pepe/2_walk/W-22.png',
@@ -10,6 +10,7 @@ class Character extends MovableObject {
         'img/2_character_pepe/2_walk/W-25.png',
         'img/2_character_pepe/2_walk/W-26.png'
     ];
+    
     IMAGES_JUMPING = [
         'img/2_character_pepe/3_jump/J-31.png',
         'img/2_character_pepe/3_jump/J-32.png',
@@ -30,13 +31,11 @@ class Character extends MovableObject {
         'img/2_character_pepe/5_dead/D-56.png',
         'img/2_character_pepe/5_dead/D-57.png'
     ];
-
     IMAGES_HURT = [
         'img/2_character_pepe/4_hurt/H-41.png',
         'img/2_character_pepe/4_hurt/H-42.png',
         'img/2_character_pepe/4_hurt/H-43.png'
     ];
-
     IMAGES_IDLE = [
         'img/2_character_pepe/1_long_idle/I-1.png',
         'img/2_character_pepe/1_long_idle/I-2.png',
@@ -49,7 +48,6 @@ class Character extends MovableObject {
     ];
 
     collectedCoins = 0;
-    world;
     walking_sound = new Audio('audio/walking.mp3');
 
     constructor() {
@@ -59,70 +57,79 @@ class Character extends MovableObject {
         this.loadImages(this.IMAGES_DEAD);
         this.loadImages(this.IMAGES_HURT);
         this.loadImages(this.IMAGES_IDLE);
-        this.applyGravity();
+        this.applyGravity(); 
         this.animate();
     }
-    checkCoinCollision() { // NEU
+
+    // Проверка и сбор монет
+    checkCoinCollision() {
+        if (!this.world || !this.world.coins) return;
         this.world.coins.forEach((coin, index) => {
-            if (this.isColliding(coin)) { // Prüft Kollision mit einem Coin
-                this.world.coins.splice(index, 1); // Coin entfernen
-                this.collectCoin(); // Coin sammeln
+            if (this.isColliding(coin)) {
+                this.world.coins.splice(index, 1);
+                this.collectCoin();
             }
         });
     }
 
-    collectCoin() { // NEU
+    collectCoin() {
         this.collectedCoins++;
-        let percentage = Math.min(this.collectedCoins * 20, 100); // Maximal 100%
-        this.world.coinStatusBar.setPercentage(percentage); // Coin-Anzeige aktualisieren
+        let percentage = Math.min(this.collectedCoins * 20, 100);
+        this.world.coinStatusBar.setPercentage(percentage);
     }
-    
+
+    // Прыжок, если персонаж на земле
+    jump() {
+        if (!this.isAboveGround()) {
+            this.speedY = 30;
+        }
+    }
+
+    // Базовый метод движения влево, ограничиваем x >= 0
+    moveLeft() {
+        this.x = Math.max(0, this.x - this.speed);
+    }
+
+    // Базовый метод движения вправо
+    moveRight() {
+        this.x += this.speed;
+    }
 
     animate() {
+        // Логика движения (60 кадров/сек)
         setInterval(() => {
+            if (!this.world || !this.world.keyboard) return;
             this.checkCoinCollision();
             this.walking_sound.pause();
 
-           
             if (this.world.keyboard.RIGHT && this.x < this.world.level.level_end_x) {
                 this.moveRight();
                 this.otherDirection = false;
-                this.playAnimation(this.IMAGES_WALKING);
                 this.walking_sound.play();
-            } 
-            
-            else if (this.world.keyboard.LEFT && this.x > 0) {
+            } else if (this.world.keyboard.LEFT && this.x > 0) {
                 this.moveLeft();
-                this.walking_sound.play();
                 this.otherDirection = true;
-                this.playAnimation(this.IMAGES_WALKING);
-            }
-        
-            else if (this.world.keyboard.SPACE && !this.isAboveGround()) {
+                this.walking_sound.play();
+            } else if (this.world.keyboard.SPACE && !this.isAboveGround()) {
                 this.jump();
-                this.playAnimation(this.IMAGES_JUMPING); 
             }
-            
-            else if (!this.isAboveGround()) {
-                this.playAnimation(this.IMAGES_IDLE);
-            }
+            // Убрали логику броска бутылок (D), т.к. она теперь в world.class.js
+        }, 1000 / 60);
 
-            
+        // Смена кадров анимации каждые 150 мс
+        setInterval(() => {
+            if (!this.world) return;
             if (this.isHurt()) {
                 this.playAnimation(this.IMAGES_HURT);
-            }
-
-         
-            if (this.isDead()) {
+            } else if (this.isDead()) {
                 this.playAnimation(this.IMAGES_DEAD);
-            }
-
-            
-            if (this.isAboveGround()) {
+            } else if (this.isAboveGround()) {
                 this.playAnimation(this.IMAGES_JUMPING);
+            } else if (this.world.keyboard?.RIGHT || this.world.keyboard?.LEFT) {
+                this.playAnimation(this.IMAGES_WALKING);
+            } else {
+                this.playAnimation(this.IMAGES_IDLE);
             }
-
-            this.world.camera_x = -this.x + 100;
-        }, 1000 / 60); 
+        }, 150);
     }
 }
